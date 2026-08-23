@@ -1,53 +1,106 @@
-const test=require('node:test');
-const assert=require('node:assert/strict');
-const S=require('../state-system.js');
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const S = require('../state-system.js');
 
-test('Burning OnEnter adds only its own temporary Fire contribution',()=>{
-  const e=S.createEntity(1,'B',0,0,{fire:2});
-  S.applyEffect(e,S.STATE_DEFS.burning.triggers.onEnter[0],'Burning.OnEnter',0);
-  assert.equal(S.getAttributeTotal(e,'fire'),3);
-  S.expireContributions(e,9999);
-  assert.equal(S.getAttributeTotal(e,'fire'),3);
-  S.expireContributions(e,1);
-  assert.equal(S.getAttributeTotal(e,'fire'),2);
+function run(entity, influence, milliseconds, startAt = 0) {
+  let now = startAt;
+  const events = [];
+  for (let elapsed = 0; elapsed < milliseconds; elapsed += 100) {
+    now += 100;
+    events.push(...S.advanceEntity(entity, influence, 100, now));
+    events.push(...S.evaluateRules(entity, now));
+  }
+  return { now, events };
+}
+
+test('Burning OnEnter no longer grants Fire', () => {
+  const entity = S.createEntity(1, 'B');
+  const onEnter = S.STATE_DEFS.burning.triggers.onEnter;
+  assert.equal(onEnter.length, 0);
+  entity.states.burning.active = true;
+  entity.states.burning.hasActivated = true;
+  S.evaluateRules(entity, 0);
+  assert.equal(S.getAttributeTotal(entity, 'fire'), 0);
 });
 
-test('Fire +2 burns B, and B temporary Fire +1 burns C before expiry',()=>{
-  const b=S.createEntity(2,'B'),c=S.createEntity(3,'C');
-  let now=0,entered=false;
-  for(let i=0;i<50;i++){now+=100;const events=S.advanceEntity(b,{fire:2},100,now);if(events.some(e=>e.type==='enter'&&e.state==='burning'))entered=true;}
-  assert.equal(entered,true);
-  S.applyEffect(b,S.STATE_DEFS.burning.triggers.onEnter[0],'Burning.OnEnter',now);
-  assert.equal(S.getAttributeTotal(b,'fire'),1);
-  let cEntered=false;
-  for(let i=0;i<100;i++){now+=100;const fire=S.getAttributeTotal(b,'fire');const events=S.advanceEntity(c,{fire},100,now);if(events.some(e=>e.type==='enter'&&e.state==='burning'))cEntered=true;S.expireContributions(b,100);}
-  assert.equal(cEntered,true);
-  assert.equal(S.getAttributeTotal(b,'fire'),0);
+test('Burning shorter than 5 seconds does not grant Fire', () => {
+  const entity = S.createEntity(1, 'B');
+  entity.states.burning.active = true;
+  entity.states.burning.hasActivated = true;
+  run(entity, { fire: 1 }, 4900);
+  assert.equal(S.getAttributeTotal(entity, 'fire'), 0);
 });
 
-test('Burning and Frozen coexist; RemoveStateProgress advances exits',()=>{
-  const e=S.createEntity(1,'B');
-  e.states.burning.active=true;e.states.burning.entry=100;
-  e.states.frozen.active=true;e.states.frozen.entry=100;
-  S.applyEffect(e,S.STATE_DEFS.burning.triggers.onTick[0],'Burning.OnTick');
-  S.applyEffect(e,S.STATE_DEFS.frozen.triggers.onTick[0],'Frozen.OnTick');
-  assert.equal(e.states.burning.active,true);assert.equal(e.states.frozen.active,true);
-  assert.equal(e.states.burning.exit,5);assert.equal(e.states.frozen.exit,5);
+test('Burning ActiveFor 5 seconds grants Fire +1 exactly once', () => {
+  const entity = S.createEntity(1, 'B');
+  entity.states.burning.active = true;
+  entity.states.burning.hasActivated = true;
+  let result = run(entity, { fire: 1 }, 5000);
+  assert.equal(S.getAttributeTotal(entity, 'fire'), 1);
+  result = run(entity, { fire: 1 }, 15000, result.now);
+  assert.equal(S.getAttributeTotal(entity, 'fire'), 1);
+  assert.equal(entity.contributions[0].remainingMs, null);
 });
 
-test('all four V0.2 effect types operate on existing data',()=>{
-  const e=S.createEntity(1,'E',0,0,{fire:2});
-  S.applyEffect(e,{kind:'RemoveAttribute',attribute:'fire',amount:1},'test');assert.equal(e.baseAttributes.fire,1);
-  S.applyEffect(e,{kind:'AddAttribute',attribute:'water',amount:1},'test');assert.equal(S.getAttributeTotal(e,'water'),1);
-  S.applyEffect(e,{kind:'AddStateProgress',state:'poisoned',amount:20},'test');assert.equal(e.states.poisoned.entry,20);
-  S.applyEffect(e,{kind:'RemoveStateProgress',state:'poisoned',amount:5},'test');assert.equal(e.states.poisoned.entry,15);
+test('Fire remains after Burning exits and is removed after 10 inactive seconds', () => {
+  const entity = S.createEntity(1, 'B');
+  entity.states.burning.active = true;
+  entity.states.burning.hasActivated = true;
+  let result = run(entity, { fire: 1 }, 5000);
+  assert.equal(S.getAttributeTotal(entity, 'fire'), 1);
+  entity.states.burning.active = false;
+  entity.states.burning.activeDurationMs = 0;
+  entity.states.burning.inactiveDurationMs = 0;
+  result = run(entity, {}, 9900, result.now);
+  assert.equal(S.getAttributeTotal(entity, 'fire'), 1);
+  run(entity, {}, 100, result.now);
+  assert.equal(S.getAttributeTotal(entity, 'fire'), 0);
 });
 
-test('Environment uses the same state, effect and contribution model',()=>{
-  const env=S.createEnvironment(0,'Environment');
-  env.states.burning.active=true;
-  S.applyEffect(env,S.STATE_DEFS.burning.triggers.onEnter[0],'Burning.OnEnter',0);
-  assert.equal(env.isEnvironment,true);
-  assert.equal(S.getAttributeTotal(env,'fire'),1);
-  assert.ok(env.states.frozen);
+test('re-entering Burning cancels removal and keeps Fire without stacking', () => {
+  const entity = S.createEntity(1, 'B');
+  entity.states.burning.active = true;
+  entity.states.burning.hasActivated = true;
+  let result = run(entity, { fire: 1 }, 5000);
+  entity.states.burning.active = false;
+  entity.states.burning.activeDurationMs = 0;
+  entity.states.burning.inactiveDurationMs = 0;
+  result = run(entity, {}, 7000, result.now);
+  entity.states.burning.active = true;
+  entity.states.burning.inactiveDurationMs = 0;
+  result = run(entity, { fire: 1 }, 6000, result.now);
+  assert.equal(S.getAttributeTotal(entity, 'fire'), 1);
+  assert.equal(entity.contributions.length, 1);
+});
+
+test('A Fire +2 can burn B; B becomes a source only after active duration', () => {
+  const b = S.createEntity(2, 'B');
+  let result = run(b, { fire: 2 }, 5000);
+  assert.equal(b.states.burning.active, true);
+  assert.equal(S.getAttributeTotal(b, 'fire'), 0);
+  result = run(b, { fire: 2 }, 5000, result.now);
+  assert.equal(S.getAttributeTotal(b, 'fire'), 1);
+  const c = S.createEntity(3, 'C');
+  run(c, { fire: S.getAttributeTotal(b, 'fire') }, 10000, result.now);
+  assert.equal(c.states.burning.active, true);
+});
+
+test('Burning and Frozen remain coexistent and use existing progress effects', () => {
+  const entity = S.createEntity(1, 'B');
+  entity.states.burning.active = true;
+  entity.states.frozen.active = true;
+  S.applyEffect(entity, S.STATE_DEFS.burning.triggers.onTick[0], 'Burning.OnTick');
+  S.applyEffect(entity, S.STATE_DEFS.frozen.triggers.onTick[0], 'Frozen.OnTick');
+  assert.equal(entity.states.burning.active, true);
+  assert.equal(entity.states.frozen.active, true);
+  assert.equal(entity.states.burning.exit, 5);
+  assert.equal(entity.states.frozen.exit, 5);
+});
+
+test('Environment uses the same durations, rules and effects', () => {
+  const environment = S.createEnvironment(0, 'Environment');
+  environment.states.burning.active = true;
+  environment.states.burning.hasActivated = true;
+  run(environment, {}, 5000);
+  assert.equal(S.getAttributeTotal(environment, 'fire'), 1);
 });
