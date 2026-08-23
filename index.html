@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101823" />
+  <title>状态实验场 · Demo 01</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">GAME SYSTEM PROTOTYPE · 01</p>
+      <h1>状态实验场</h1>
+    </div>
+    <div class="sim-controls">
+      <span id="tickLabel" class="tick-label">TICK 0000</span>
+      <button id="resetBtn" class="button ghost">重置</button>
+      <button id="toggleBtn" class="button primary">▶ 启动模拟</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="workspace panel">
+      <div class="panel-heading">
+        <div>
+          <h2>实验区域</h2>
+          <p>拖动物体使其重叠，接触双方会互相施加属性影响。</p>
+        </div>
+        <button id="createBtn" class="button compact">＋ 生成实体</button>
+      </div>
+      <div id="arena" class="arena" aria-label="实体实验区域">
+        <div class="grid-glow"></div>
+        <div class="arena-tip">拖动实体 · 重叠即产生影响</div>
+      </div>
+      <div class="legend">
+        <span><i class="dot fire"></i>火</span><span><i class="dot water"></i>水</span>
+        <span><i class="dot frost"></i>冰</span><span><i class="dot toxin"></i>毒</span>
+        <span class="muted">实体外圈 = 当前属性构成</span>
+      </div>
+    </section>
+
+    <aside class="inspector panel">
+      <div class="panel-heading slim">
+        <div><p class="eyebrow">INSPECTOR</p><h2 id="selectedName">未选择实体</h2></div>
+        <button id="deleteBtn" class="icon-button" title="删除实体" disabled>×</button>
+      </div>
+      <div id="emptyInspector" class="empty-state">点击实验区域中的实体<br>查看并修改它的属性和状态</div>
+      <div id="entityInspector" class="hidden">
+        <label class="field-label" for="nameInput">实体名称</label>
+        <input id="nameInput" class="text-input" maxlength="12" />
+
+        <div class="section-title"><span>属性强度</span><small>持续影响进入/退出值</small></div>
+        <div id="attributeControls" class="control-list"></div>
+
+        <div class="section-title"><span>直接施加状态</span><small>允许互斥状态共存</small></div>
+        <div id="statusButtons" class="status-buttons"></div>
+
+        <div class="section-title"><span>当前状态</span><small>进入值 / 退出值</small></div>
+        <div id="statusList" class="status-list"></div>
+      </div>
+    </aside>
+
+    <section class="environment panel">
+      <div class="panel-heading slim">
+        <div><p class="eyebrow">GLOBAL ENTITY</p><h2>环境</h2></div>
+        <label class="switch"><input id="envEnabled" type="checkbox" checked><span></span></label>
+      </div>
+      <p class="panel-copy">环境是特殊实体，不需要接触，会对所有普通实体产生全局影响。</p>
+      <div id="environmentControls" class="control-list"></div>
+    </section>
+
+    <section class="rules panel">
+      <div class="panel-heading slim"><div><p class="eyebrow">RULES</p><h2>本版规则</h2></div></div>
+      <ol>
+        <li>属性只是影响源，不等同于状态。</li>
+        <li>进入值达到 <b>100</b>，实体进入对应状态。</li>
+        <li>影响消失后退出值增长；达到 <b>100</b>，状态解除。</li>
+        <li>火/水、火/冰会互相削减，但燃烧与潮湿可以同时存在。</li>
+      </ol>
+    </section>
+
+    <section class="timeline panel">
+      <div class="panel-heading slim">
+        <div><p class="eyebrow">EVENT STREAM</p><h2>事件记录</h2></div>
+        <button id="clearLogBtn" class="text-button">清空</button>
+      </div>
+      <div id="eventLog" class="event-log"></div>
+    </section>
+  </main>
+
+  <template id="rangeTemplate">
+    <div class="range-row">
+      <div class="range-meta"><span class="range-name"></span><output>0</output></div>
+      <input type="range" min="0" max="100" step="10" value="0" />
+    </div>
+  </template>
+  <script src="app.js"></script>
+</body>
+</html>
