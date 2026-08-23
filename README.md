@@ -1,4 +1,4 @@
-# 状态实验场 · Demo 01 V0.2
+# 状态实验场 · Demo 01 V0.2.1
 
 一个用于验证 `Attribute → State → Trigger → Effect → Attribute` 闭环的纯前端 H5 原型。
 
@@ -12,10 +12,10 @@
 - 状态拥有相互独立的进入值和退出值
 - 互斥属性会削弱影响，但状态仍允许同时存在
 - 实时事件日志，便于观察规则是否符合预期
-- Attribute Contribution：Base 与临时 Effect 来源独立叠加、独立到期
+- Attribute Contribution：Base 与 Rule/Effect 来源独立叠加
 - State 支持 OnEnter / OnTick / OnExit Trigger
 - Effect 仅包含 Add/Remove Attribute 与 Add/Remove StateProgress
-- 预置 Burning 传播和 Burning/Frozen 状态克制
+- 预置 Burning 持续/退出规则和 Burning/Frozen 状态克制
 - Environment 复用普通实体的 Attribute / State / Effect 数据结构
 
 ## 运行
@@ -31,7 +31,7 @@
 
 ## 核心验收路径
 
-拖动 `A · 火源（Fire +2）` 与 B 重叠。B 进入 Burning 后，通过 OnEnter 临时获得 `Fire +1 / 10s`；再让 B 与 C 重叠，C 会被 B 点燃。B 与火源分离后仍按 Exit Progress 正常退出 Burning。
+拖动 `A · 火源（Fire +2）` 与 B 重叠。B 进入 Burning 时不会立即获得属性；持续 Burning 5 秒后，`StateActiveFor → AddAttribute` 使 B 获得 `Fire +1`。B 退出 Burning 后属性仍保留；若连续 10 秒没有重新进入 Burning，`StateInactiveFor → RemoveAttribute` 移除这份 Fire。期间重新 Burning 会取消移除倒计时，且不会重复叠加。
 
 ## 测试
 
