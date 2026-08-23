@@ -6,12 +6,13 @@
   <meta name="theme-color" content="#101823" />
   <title>状态实验场 · Demo 01</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="v02.css" />
 </head>
 <body>
   <header class="topbar">
     <div>
-      <p class="eyebrow">GAME SYSTEM PROTOTYPE · 01</p>
-      <h1>状态实验场</h1>
+      <p class="eyebrow">GAME SYSTEM PROTOTYPE · V0.2</p>
+      <h1>状态 → 效果 → 属性</h1>
     </div>
     <div class="sim-controls">
       <span id="tickLabel" class="tick-label">TICK 0000</span>
@@ -50,8 +51,11 @@
         <label class="field-label" for="nameInput">实体名称</label>
         <input id="nameInput" class="text-input" maxlength="12" />
 
-        <div class="section-title"><span>属性强度</span><small>持续影响进入/退出值</small></div>
+        <div class="section-title"><span>Base Attribute</span><small>持久贡献，可手动调整</small></div>
         <div id="attributeControls" class="control-list"></div>
+
+        <div class="section-title"><span>Attribute Sources</span><small>最终强度 = 来源合计</small></div>
+        <div id="contributionList" class="contribution-list"></div>
 
         <div class="section-title"><span>直接施加状态</span><small>允许互斥状态共存</small></div>
         <div id="statusButtons" class="status-buttons"></div>
@@ -66,17 +70,18 @@
         <div><p class="eyebrow">GLOBAL ENTITY</p><h2>环境</h2></div>
         <label class="switch"><input id="envEnabled" type="checkbox" checked><span></span></label>
       </div>
-      <p class="panel-copy">环境是特殊实体，不需要接触，会对所有普通实体产生全局影响。</p>
-      <div id="environmentControls" class="control-list"></div>
+      <p class="panel-copy">环境复用同一套 Attribute / State / Effect，仅 Influence 为全局。</p>
+      <div id="environmentSummary" class="environment-summary"></div>
+      <button id="inspectEnvBtn" class="button env-button">检查与调试 Environment</button>
     </section>
 
     <section class="rules panel">
       <div class="panel-heading slim"><div><p class="eyebrow">RULES</p><h2>本版规则</h2></div></div>
       <ol>
-        <li>属性只是影响源，不等同于状态。</li>
+        <li>Attribute 持久存在；分离只会失去 Influence。</li>
         <li>进入值达到 <b>100</b>，实体进入对应状态。</li>
         <li>影响消失后退出值增长；达到 <b>100</b>，状态解除。</li>
-        <li>火/水、火/冰会互相削减，但燃烧与潮湿可以同时存在。</li>
+        <li>State 通过 Trigger 执行 Effect；状态永远允许共存。</li>
       </ol>
     </section>
 
@@ -95,6 +100,7 @@
       <input type="range" min="0" max="100" step="10" value="0" />
     </div>
   </template>
+  <script src="state-system.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
