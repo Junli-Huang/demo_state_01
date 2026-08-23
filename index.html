@@ -7,6 +7,7 @@
   <title>状态实验场 · Demo 01</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="v02.css" />
+  <link rel="stylesheet" href="v021.css" />
 </head>
 <body>
   <header class="topbar">
@@ -81,7 +82,8 @@
         <li>Attribute 持久存在；分离只会失去 Influence。</li>
         <li>进入值达到 <b>100</b>，实体进入对应状态。</li>
         <li>影响消失后退出值增长；达到 <b>100</b>，状态解除。</li>
-        <li>State 通过 Trigger 执行 Effect；状态永远允许共存。</li>
+        <li>State 提供事实；Condition 满足后由 Effect 修改属性。</li>
+        <li>Burning 持续 5s 获得 Fire +1；退出 10s 后移除。</li>
       </ol>
     </section>
 
