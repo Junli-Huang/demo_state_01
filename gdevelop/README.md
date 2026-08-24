@@ -4,4 +4,4 @@
 
 核心规则按职责声明为外部事件：`ApplyInfluence`、`AdvanceState`、`EvaluateStateTriggers`、`EvaluateConditionRules`、`ApplyEffect`、`GetAttributeTotal`。当前可运行迁移层通过场景 JavaScript Event 调度这些同名职责，避免为 Fire/Burning 建立专用 Object。
 
-本仓库不在 CI 安装非官方构建器。请在 GDevelop 中 Web 导出到仓库根目录的 `web-build/`，提交后由 GitHub Actions 原样部署。
+GitHub Actions 使用固定版本的官方 GDevelop AppImage 和 `EXPORT_HTML5_EXTERNAL`，自动导出到 `web-build/` 后部署 Pages；不使用第三方 exporter。
