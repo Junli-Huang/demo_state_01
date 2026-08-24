@@ -61,6 +61,7 @@ jobs:
             "$GITHUB_WORKSPACE/gdevelop/game.json" \
             --block-on-diagnostic-errors
           test -f web-build/index.html
+          sed -i -E "s#(src=\"[^\"]+\\.js)\"#\\1?v=${GITHUB_SHA}\"#g" web-build/index.html
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
