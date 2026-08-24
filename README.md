@@ -20,10 +20,10 @@ Attribute → Influence → State Enter / Exit → State
 
 ## 开发与发布
 
-1. 用当前稳定版 GDevelop 打开 `gdevelop/game.json`。
-2. Web 导出目标选择 `web-build/`。
-3. 提交工程源和导出结果。
-4. GitHub Actions 只部署 `web-build/`，不在 CI 安装第三方 GDevelop CLI。
+1. 用 GDevelop 打开 `gdevelop/game.json` 修改工程。
+2. 提交工程源；不需要手工更新 `web-build/`。
+3. GitHub Actions 使用固定版本的官方 GDevelop CLI 执行 `EXPORT_HTML5_EXTERNAL`。
+4. 规则测试和 GDevelop 诊断通过后，Action 将生成的 `web-build/` 部署到 Pages。
 
 本版本只迁移技术载体，不增加 Attribute、State、战斗、HP、AI、技能、范围、距离衰减、Resistance、Counter 或通用规则编辑器。
 
