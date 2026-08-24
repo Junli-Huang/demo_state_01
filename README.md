@@ -13,7 +13,7 @@ Attribute → Influence → State Enter / Exit → State
 
 ## 目录
 
-- `gdevelop/`：GDevelop 5 工程源，主场景 `Playground`
+- `gdevelop/`：GDevelop 5 工程源，主场景 `Playground`；包含统一 Entity Sprite、实例变量、Draggable Behavior 和原生场景事件循环
 - `web-build/`：提交到仓库的 HTML5 导出结果，也是 GitHub Pages 唯一部署目录
 - `legacy-web/`：迁移前 V0.2.2 H5 Prototype，仅作规则参考
 - `tests/`：与载体无关的状态规则回归测试
