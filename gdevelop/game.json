@@ -80,7 +80,7 @@
         "// Native GDevelop objects + instance variables. This event only dispatches the V0.3 rule loop.",
         "const dt = runtimeScene.getElapsedTime() / 1000;",
         "const entities = runtimeScene.getObjects('Entity');",
-        "const child = (v, ...path) => path.reduce((p, key) => p.getChild(key), v);",
+        "const child = (v, ...path) => path.slice(1).reduce((p, key) => p.getChild(key), v.get(path[0]));",
         "const num = (v, ...path) => child(v, ...path).getAsNumber();",
         "const setNum = (v, value, ...path) => child(v, ...path).setNumber(value);",
         "const bool = (v, ...path) => child(v, ...path).getAsBoolean();",
