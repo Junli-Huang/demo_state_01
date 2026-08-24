@@ -4,7 +4,7 @@ const entities = runtimeScene.getObjects('Entity');
 const states = ['Burning', 'Wet', 'Frozen', 'Poisoned'];
 const pg = runtimeScene.__statePlayground || (runtimeScene.__statePlayground = {
   running: true, logs: [], overlaps: new Set(), tickAt: new Map(), timed: [], contributions: new Map(), contributionId: 1,
-  selectedState: 'Burning', selectedEntity: null,
+  selectedState: 'Burning', selectedEntityId: 0,
   effects: {
     Burning: { OnEnter: [], OnTick: [{ type: 'RemoveStateProgress', target: 'Frozen', amount: 5 }], OnExit: [] },
     Wet: { OnEnter: [], OnTick: [], OnExit: [] },
@@ -127,7 +127,7 @@ if (!pg.root) {
   canvas.addEventListener('pointerdown', event => {
     const point = scenePoint(event);
     draggedEntity = entities.find(entity => Math.abs(entity.getCenterXInScene() - point.x) < 52 && Math.abs(entity.getCenterYInScene() - point.y) < 52) || null;
-    if (draggedEntity) { pg.selectedEntity = draggedEntity; canvas.setPointerCapture(event.pointerId); event.preventDefault(); }
+    if (draggedEntity) { pg.selectedEntityId = num(draggedEntity.getVariables(), 'Id'); canvas.setPointerCapture(event.pointerId); event.preventDefault(); }
   });
   canvas.addEventListener('pointermove', event => {
     if (!draggedEntity) return;
@@ -138,6 +138,11 @@ if (!pg.root) {
   const finishDrag = event => { if (draggedEntity) { draggedEntity = null; event.preventDefault(); } };
   canvas.addEventListener('pointerup', finishDrag);
   canvas.addEventListener('pointercancel', finishDrag);
+  canvas.addEventListener('click', event => {
+    const point = scenePoint(event);
+    const selected = runtimeScene.getObjects('Entity').find(entity => Math.abs(entity.getCenterXInScene() - point.x) < 52 && Math.abs(entity.getCenterYInScene() - point.y) < 52);
+    if (selected) pg.selectedEntityId = num(selected.getVariables(), 'Id');
+  });
   addLog('Playground ready');
   renderEditor();
 }
@@ -173,5 +178,5 @@ if (pg.running) {
 }
 
 const cards = pg.root.querySelector('#sp-cards');
-cards.innerHTML = entities.map(entity => { const v = entity.getVariables(), name = entityName(entity), attrs = v.get('Attributes').toJSObject() || {}, stateData = v.get('States').toJSObject() || {}, selected = pg.selectedEntity === entity, sources = ensureContributions(entity).filter(item => item.attribute === 'Fire'), sourceHtml = sources.length ? sources.map(item => `<div class="sp-row"><span>↳ ${item.source}</span><span>+${item.amount}${item.remaining == null ? '' : ` · ${Math.max(0, item.remaining).toFixed(1)}s`}</span></div>`).join('') : '<div class="sp-row"><span>↳ No Sources</span><span>—</span></div>', s = stateData.Burning || {}, active = !!s.Active, phase = active ? 'Exit' : 'Enter', progress = active ? (s.ExitProgress || 0) : (s.EnterProgress || 0), duration = active ? (s.ActiveDuration || 0) : (s.InactiveDuration || 0), stateInspector = selected ? `<div class="sp-state-list"><div class="sp-selected-label">SELECTED INSTANCE · STATES</div>${states.map(state => { const data = stateData[state] || {}, isActive = !!data.Active; return `<div class="sp-state-row"><b>${state}</b><span class="${isActive ? 'on' : 'off'}">${isActive ? 'ACTIVE' : 'OFF'}</span><span>Enter ${Math.round(data.EnterProgress || 0)} · Exit ${Math.round(data.ExitProgress || 0)} · ${isActive ? 'A' : 'I'} ${Number(isActive ? data.ActiveDuration || 0 : data.InactiveDuration || 0).toFixed(1)}s</span></div>`; }).join('')}</div>` : ''; if (entity.setColor) entity.setColor(active ? '255;105;66' : '255;255;255'); return `<div class="sp-card ${active ? 'active' : ''} ${selected ? 'selected' : ''}"><div class="sp-row"><span class="sp-name">${name}</span><b>${active ? '🔥 BURNING' : 'INACTIVE'}</b></div><div class="sp-row"><span>ATTR · Fire</span><b>+${attrs.Fire || 0}</b></div>${sourceHtml}<div class="sp-row"><span>${phase} Progress</span><span>${Math.round(progress)}/100</span></div><div class="sp-meter"><i style="width:${Math.min(100, progress)}%"></i></div><div class="sp-row"><span>${active ? 'Active' : 'Inactive'} Duration</span><span>${duration.toFixed(1)}s</span></div>${active && !s.Granted ? `<div class="sp-row"><span>Fire grant</span><span>${Math.min(5, duration).toFixed(1)}/5.0s</span></div>` : ''}${!active && s.Granted ? `<div class="sp-row"><span>Fire removal</span><span>${Math.min(10, duration).toFixed(1)}/10.0s</span></div>` : ''}${stateInspector}</div>`; }).join('');
+cards.innerHTML = entities.map(entity => { const v = entity.getVariables(), name = entityName(entity), attrs = v.get('Attributes').toJSObject() || {}, stateData = v.get('States').toJSObject() || {}, selected = pg.selectedEntityId === num(v, 'Id'), sources = ensureContributions(entity).filter(item => item.attribute === 'Fire'), sourceHtml = sources.length ? sources.map(item => `<div class="sp-row"><span>↳ ${item.source}</span><span>+${item.amount}${item.remaining == null ? '' : ` · ${Math.max(0, item.remaining).toFixed(1)}s`}</span></div>`).join('') : '<div class="sp-row"><span>↳ No Sources</span><span>—</span></div>', s = stateData.Burning || {}, active = !!s.Active, phase = active ? 'Exit' : 'Enter', progress = active ? (s.ExitProgress || 0) : (s.EnterProgress || 0), duration = active ? (s.ActiveDuration || 0) : (s.InactiveDuration || 0), stateInspector = selected ? `<div class="sp-state-list"><div class="sp-selected-label">SELECTED INSTANCE · STATES</div>${states.map(state => { const data = stateData[state] || {}, isActive = !!data.Active; return `<div class="sp-state-row"><b>${state}</b><span class="${isActive ? 'on' : 'off'}">${isActive ? 'ACTIVE' : 'OFF'}</span><span>Enter ${Math.round(data.EnterProgress || 0)} · Exit ${Math.round(data.ExitProgress || 0)} · ${isActive ? 'A' : 'I'} ${Number(isActive ? data.ActiveDuration || 0 : data.InactiveDuration || 0).toFixed(1)}s</span></div>`; }).join('')}</div>` : ''; if (entity.setColor) entity.setColor(active ? '255;105;66' : '255;255;255'); return `<div class="sp-card ${active ? 'active' : ''} ${selected ? 'selected' : ''}"><div class="sp-row"><span class="sp-name">${name}</span><b>${active ? '🔥 BURNING' : 'INACTIVE'}</b></div><div class="sp-row"><span>ATTR · Fire</span><b>+${attrs.Fire || 0}</b></div>${sourceHtml}<div class="sp-row"><span>${phase} Progress</span><span>${Math.round(progress)}/100</span></div><div class="sp-meter"><i style="width:${Math.min(100, progress)}%"></i></div><div class="sp-row"><span>${active ? 'Active' : 'Inactive'} Duration</span><span>${duration.toFixed(1)}s</span></div>${active && !s.Granted ? `<div class="sp-row"><span>Fire grant</span><span>${Math.min(5, duration).toFixed(1)}/5.0s</span></div>` : ''}${!active && s.Granted ? `<div class="sp-row"><span>Fire removal</span><span>${Math.min(10, duration).toFixed(1)}/10.0s</span></div>` : ''}${stateInspector}</div>`; }).join('');
 pg.root.querySelector('#sp-log-lines').innerHTML = pg.logs.map(line => `<div>${line}</div>`).join('');
