@@ -1,4 +1,4 @@
-# 状态实验场 · Demo 01 V0.2.1
+# 状态实验场 · Demo 01 V0.2.2
 
 一个用于验证 `Attribute → State → Trigger → Effect → Attribute` 闭环的纯前端 H5 原型。
 
@@ -17,6 +17,10 @@
 - Effect 仅包含 Add/Remove Attribute 与 Add/Remove StateProgress
 - 预置 Burning 持续/退出规则和 Burning/Frozen 状态克制
 - Environment 复用普通实体的 Attribute / State / Effect 数据结构
+- 暂停模拟时，可在每个 State 中编辑全局 OnEnter / OnTick / OnExit Effects[]
+- Effect 编辑器开放现有四类 Effect，支持多条追加、修改与删除
+- Trigger Effects 可编辑；V0.2.1 Condition Effects 保持只读且独立运行
+- Reset 会恢复默认 Trigger Effect 配置
 
 ## 运行
 
