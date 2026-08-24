@@ -55,7 +55,7 @@ jobs:
           chmod +x .cache/gdevelop/GDevelop.AppImage
           rm -rf web-build
           .cache/gdevelop/GDevelop.AppImage --appimage-extract >/dev/null
-          xvfb-run -a ./squashfs-root/AppRun \
+          APPDIR="$GITHUB_WORKSPACE/squashfs-root" xvfb-run -a ./squashfs-root/AppRun \
             --no-sandbox \
             --disable-update-check \
             --run-command EXPORT_HTML5_EXTERNAL \
