@@ -4,7 +4,7 @@ const entities = runtimeScene.getObjects('Entity');
 const states = ['Burning', 'Wet', 'Frozen', 'Poisoned'];
 const pg = runtimeScene.__statePlayground || (runtimeScene.__statePlayground = {
   running: true, logs: [], overlaps: new Set(), tickAt: new Map(), timed: [], contributions: new Map(), contributionId: 1,
-  selectedState: 'Burning', selectedEntityId: 0,
+  selectedState: 'Burning', selectedEntityId: 2,
   effects: {
     Burning: { OnEnter: [], OnTick: [{ type: 'RemoveStateProgress', target: 'Frozen', amount: 5 }], OnExit: [] },
     Wet: { OnEnter: [], OnTick: [], OnExit: [] },
