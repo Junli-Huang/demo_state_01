@@ -78,7 +78,7 @@
       "type": "BuiltinCommonInstructions::JsCode",
       "inlineCode": [
         "// Native GDevelop objects + instance variables. This event only dispatches the V0.3 rule loop.",
-        "const dt = runtimeScene.getElapsedTime() / 1000;",
+        "const dt = runtimeScene.getTimeManager().getElapsedTime() / 1000;",
         "const entities = runtimeScene.getObjects('Entity');",
         "const pg = runtimeScene.__statePlayground || (runtimeScene.__statePlayground={running:true,logs:[],overlaps:new Set()});",
         "const addLog = text => { const t=(runtimeScene.getTimeManager().getTimeFromStart()/1000).toFixed(1); pg.logs.unshift(`${t}s · ${text}`); pg.logs=pg.logs.slice(0,14); };",
