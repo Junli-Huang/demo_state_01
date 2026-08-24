@@ -1,4 +1,4 @@
-name: Deploy GDevelop web build to Pages
+name: Build GDevelop and deploy Pages
 on:
   push:
     branches: [main]
@@ -16,10 +16,57 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    env:
+      GDEVELOP_VERSION: 5.6.280
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test project model
+        run: node --test tests/*.test.js
+
+      - name: Install GDevelop runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3 libasound2t64 libgtk-3-0 libgbm1 xvfb
+
+      - name: Cache GDevelop AppImage
+        id: cache-gdevelop
+        uses: actions/cache@v4
+        with:
+          path: .cache/gdevelop/GDevelop.AppImage
+          key: gdevelop-linux-${{ env.GDEVELOP_VERSION }}
+
+      - name: Download official GDevelop
+        if: steps.cache-gdevelop.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p .cache/gdevelop
+          release_json="$(curl --fail --location --silent --show-error \
+            "https://api.github.com/repos/4ian/GDevelop/releases/tags/v${GDEVELOP_VERSION}")"
+          asset_url="$(printf '%s' "$release_json" | jq -r \
+            '.assets[] | select(.name | endswith(".AppImage")) | .browser_download_url' | head -n 1)"
+          test -n "$asset_url"
+          curl --fail --location --retry 3 "$asset_url" \
+            --output .cache/gdevelop/GDevelop.AppImage
+
+      - name: Export GDevelop project to HTML5
+        run: |
+          chmod +x .cache/gdevelop/GDevelop.AppImage
+          rm -rf web-build
+          .cache/gdevelop/GDevelop.AppImage --appimage-extract >/dev/null
+          xvfb-run -a ./squashfs-root/AppRun \
+            --no-sandbox \
+            --disable-update-check \
+            --run-command EXPORT_HTML5_EXTERNAL \
+            "$GITHUB_WORKSPACE/gdevelop/game.json" \
+            --block-on-diagnostic-errors
+          test -f web-build/index.html
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload exported game
+        uses: actions/upload-pages-artifact@v3
         with:
           path: web-build
       - name: Deploy to GitHub Pages
