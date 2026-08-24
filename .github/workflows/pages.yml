@@ -43,8 +43,9 @@ jobs:
           mkdir -p .cache/gdevelop
           release_json="$(curl --fail --location --silent --show-error \
             "https://api.github.com/repos/4ian/GDevelop/releases/tags/v${GDEVELOP_VERSION}")"
-          asset_url="$(printf '%s' "$release_json" | jq -r \
-            '.assets[] | select(.name | endswith(".AppImage")) | .browser_download_url' | head -n 1)"
+          asset_name="GDevelop-5-${GDEVELOP_VERSION}.AppImage"
+          asset_url="$(printf '%s' "$release_json" | jq -r --arg name "$asset_name" \
+            '.assets[] | select(.name == $name) | .browser_download_url')"
           test -n "$asset_url"
           curl --fail --location --retry 3 "$asset_url" \
             --output .cache/gdevelop/GDevelop.AppImage
