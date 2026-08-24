@@ -82,7 +82,7 @@
   "layouts": [
     {
       "b": 25,
-      "disableInputWhenNotFocused": true,
+      "disableInputWhenNotFocused": false,
       "mangledName": "Playground",
       "name": "Playground",
       "r": 14,
