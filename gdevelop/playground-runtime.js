@@ -143,6 +143,11 @@ if (!pg.root) {
     const selected = runtimeScene.getObjects('Entity').find(entity => Math.abs(entity.getCenterXInScene() - point.x) < 52 && Math.abs(entity.getCenterYInScene() - point.y) < 52);
     if (selected) pg.selectedEntityId = num(selected.getVariables(), 'Id');
   });
+  canvas.addEventListener('mousedown', event => {
+    const point = scenePoint(event);
+    const selected = runtimeScene.getObjects('Entity').find(entity => Math.abs(entity.getCenterXInScene() - point.x) < 52 && Math.abs(entity.getCenterYInScene() - point.y) < 52);
+    if (selected) pg.selectedEntityId = num(selected.getVariables(), 'Id');
+  });
   addLog('Playground ready');
   renderEditor();
 }
