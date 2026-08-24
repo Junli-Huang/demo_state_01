@@ -23,6 +23,23 @@
     poisoned: { name: 'Poisoned', icon: '☠️', attribute: 'toxin', triggers: { onEnter: [], onTick: [], onExit: [] } }
   };
 
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const DEFAULT_TRIGGER_EFFECTS = Object.fromEntries(
+    Object.entries(STATE_DEFS).map(([key, definition]) => [key, clone(definition.triggers)])
+  );
+
+  function createEffect(kind = 'AddAttribute') {
+    if (kind === 'AddAttribute') return { kind, attribute: 'fire', amount: 1 };
+    if (kind === 'RemoveAttribute') return { kind, attribute: 'fire', amount: 1 };
+    return { kind, state: 'burning', amount: 5 };
+  }
+
+  function resetTriggerEffects() {
+    Object.entries(STATE_DEFS).forEach(([key, definition]) => {
+      definition.triggers = clone(DEFAULT_TRIGGER_EFFECTS[key]);
+    });
+  }
+
   // V0.2.1 only needs two simple, independent duration conditions.
   const RULE_DEFS = [
     {
@@ -251,6 +268,7 @@
 
   const api = {
     ATTRIBUTE_DEFS, STATE_DEFS, RULE_DEFS,
+    DEFAULT_TRIGGER_EFFECTS, createEffect, resetTriggerEffects,
     createEntity, createEnvironment, getAttributeTotal, setBaseAttribute,
     addContribution, removeBaseAttribute, removeContribution, hasContribution, expireContributions,
     addStateProgress, removeStateProgress, applyEffect, advanceEntity, evaluateRules
