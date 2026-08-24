@@ -21,7 +21,7 @@
     "author": "Junli Huang",
     "windowWidth": 1280,
     "windowHeight": 720,
-    "latestCompilationDirectory": "../web-build",
+    "latestCompilationDirectory": "web-build",
     "maxFPS": 60,
     "minFPS": 20,
     "verticalSync": false,
