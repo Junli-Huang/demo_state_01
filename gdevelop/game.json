@@ -1,0 +1,100 @@
+{
+  "firstLayout": "Playground",
+  "gdVersion": { "build": 274, "major": 5, "minor": 6, "revision": 0 },
+  "properties": {
+    "adaptGameResolutionAtRuntime": true,
+    "antialiasingMode": "MSAA",
+    "antialisingEnabledOnMobile": false,
+    "folderProject": false,
+    "gameResolutionResizeMode": "adaptWidth",
+    "orientation": "landscape",
+    "packageName": "com.junlihuang.demostate01",
+    "pixelsRounding": false,
+    "projectUuid": "4ad11875-6d4e-43c1-80cf-5c29fbb4b214",
+    "scaleMode": "linear",
+    "sizeOnStartupMode": "adaptGameResolutionToSize",
+    "templateSlug": "",
+    "useExternalSourceFiles": false,
+    "version": "0.3.0",
+    "name": "demo_state_01 · GDevelop Playground",
+    "description": "Attribute → Influence → State → Trigger / Condition → Effect playground",
+    "author": "Junli Huang",
+    "windowWidth": 1280,
+    "windowHeight": 720,
+    "latestCompilationDirectory": "../web-build",
+    "maxFPS": 60,
+    "minFPS": 20,
+    "verticalSync": false,
+    "platforms": [{ "name": "GDevelop JS platform" }],
+    "currentPlatform": "GDevelop JS platform"
+  },
+  "resources": { "resources": [], "resourceFolders": [] },
+  "objects": [],
+  "objectsFolderStructure": { "folderName": "__ROOT", "children": [] },
+  "objectsGroups": [],
+  "variables": [
+    { "name": "SimulationRunning", "type": "boolean", "value": false },
+    { "name": "TickInterval", "type": "number", "value": 0.1 },
+    { "name": "EnterThreshold", "type": "number", "value": 100 },
+    { "name": "ExitThreshold", "type": "number", "value": 100 }
+  ],
+  "layouts": [{
+    "b": 25,
+    "disableInputWhenNotFocused": true,
+    "mangledName": "Playground",
+    "name": "Playground",
+    "r": 14,
+    "standardSortMethod": true,
+    "stopSoundsOnStartup": true,
+    "title": "Playground",
+    "v": 19,
+    "uiSettings": { "grid": false, "gridType": "rectangular", "gridWidth": 32, "gridHeight": 32, "gridOffsetX": 0, "gridOffsetY": 0, "gridColor": 10401023, "gridAlpha": 0.8, "snap": false, "zoomFactor": 0.75, "windowMask": false },
+    "objectsGroups": [],
+    "variables": [],
+    "instances": [],
+    "objects": [],
+    "objectsFolderStructure": { "folderName": "__ROOT", "children": [] },
+    "events": [{
+      "type": "BuiltinCommonInstructions::JsCode",
+      "inlineCode": [
+        "// V0.3 entry. Scene events orchestrate input, pause and rule dispatch only.",
+        "if (!runtimeScene.__statePlaygroundBooted) {",
+        "  runtimeScene.__statePlaygroundBooted = true;",
+        "  console.info('demo_state_01 V0.3 · Playground scene started');",
+        "}"
+      ],
+      "parameterObjects": "",
+      "useStrict": true,
+      "eventsSheetExpanded": true
+    }],
+    "layers": [
+      { "ambientLightColorB": 255, "ambientLightColorG": 255, "ambientLightColorR": 255, "camera3DFarPlaneDistance": 10000, "camera3DFieldOfView": 45, "camera3DNearPlaneDistance": 0.1, "cameraType": "perspective", "followBaseLayerCamera": false, "isLightingLayer": false, "isLocked": false, "name": "", "renderingType": "2d", "visibility": true, "cameras": [{ "defaultSize": true, "defaultViewport": true, "height": 0, "viewportBottom": 1, "viewportLeft": 0, "viewportRight": 1, "viewportTop": 0, "width": 0 }] },
+      { "ambientLightColorB": 255, "ambientLightColorG": 255, "ambientLightColorR": 255, "camera3DFarPlaneDistance": 10000, "camera3DFieldOfView": 45, "camera3DNearPlaneDistance": 0.1, "cameraType": "perspective", "followBaseLayerCamera": true, "isLightingLayer": false, "isLocked": false, "name": "UI", "renderingType": "2d", "visibility": true, "cameras": [] }
+    ],
+    "behaviorsSharedData": []
+  }],
+  "externalEvents": [
+    { "events": [], "name": "ApplyInfluence" },
+    { "events": [], "name": "AdvanceState" },
+    { "events": [], "name": "EvaluateStateTriggers" },
+    { "events": [], "name": "EvaluateConditionRules" },
+    { "events": [], "name": "ApplyEffect" },
+    { "events": [], "name": "GetAttributeTotal" }
+  ],
+  "eventsFunctionsExtensions": [],
+  "externalLayouts": [],
+  "externalSourceFiles": [],
+  "projectModel": {
+    "entityObject": "Entity",
+    "attributes": ["Fire", "Water", "Ice", "Poison"],
+    "states": ["Burning", "Wet", "Frozen", "Poisoned"],
+    "stateFields": ["Active", "EnterProgress", "ExitProgress", "ActiveDuration", "InactiveDuration"],
+    "triggers": ["OnEnter", "OnTick", "OnExit"],
+    "conditionTypes": ["StateActiveFor", "StateInactiveFor"],
+    "effectTypes": ["AddAttribute", "RemoveAttribute", "AddStateProgress", "RemoveStateProgress"],
+    "burningRules": [
+      { "condition": { "type": "StateActiveFor", "seconds": 5 }, "effect": { "type": "AddAttribute", "attribute": "Fire", "amount": 1, "source": "BurningRule" } },
+      { "condition": { "type": "StateInactiveFor", "seconds": 10 }, "effect": { "type": "RemoveAttribute", "attribute": "Fire", "amount": 1, "source": "BurningRule" } }
+    ]
+  }
+}
