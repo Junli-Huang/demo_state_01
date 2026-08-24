@@ -104,3 +104,39 @@ test('Environment uses the same durations, rules and effects', () => {
   run(environment, {}, 5000);
   assert.equal(S.getAttributeTotal(environment, 'fire'), 1);
 });
+
+test('editable trigger definitions are global for every entity', () => {
+  S.resetTriggerEffects();
+  S.STATE_DEFS.burning.triggers.onEnter.push({ kind: 'AddAttribute', attribute: 'fire', amount: 2, duration: 10 });
+  const b = S.createEntity(2, 'B');
+  const c = S.createEntity(3, 'C');
+  for (const entity of [b, c]) {
+    for (const effect of S.STATE_DEFS.burning.triggers.onEnter) S.applyEffect(entity, effect, 'Burning.onEnter');
+  }
+  assert.equal(S.getAttributeTotal(b, 'fire'), 2);
+  assert.equal(S.getAttributeTotal(c, 'fire'), 2);
+  assert.equal(b.contributions[0].remainingMs, 10000);
+});
+
+test('all four editable Effect types reuse applyEffect', () => {
+  const entity = S.createEntity(1, 'E', 0, 0, { fire: 2 });
+  const effects = [
+    { kind: 'AddAttribute', attribute: 'water', amount: 2 },
+    { kind: 'RemoveAttribute', attribute: 'fire', amount: 1 },
+    { kind: 'AddStateProgress', state: 'poisoned', amount: 10 },
+    { kind: 'RemoveStateProgress', state: 'poisoned', amount: 3 }
+  ];
+  effects.forEach(effect => S.applyEffect(entity, effect, 'UI Config'));
+  assert.equal(S.getAttributeTotal(entity, 'water'), 2);
+  assert.equal(entity.baseAttributes.fire, 1);
+  assert.equal(entity.states.poisoned.entry, 7);
+});
+
+test('Reset restores default Trigger Effects without touching Condition Rules', () => {
+  S.STATE_DEFS.burning.triggers.onTick.length = 0;
+  S.STATE_DEFS.burning.triggers.onExit.push(S.createEffect('AddAttribute'));
+  S.resetTriggerEffects();
+  assert.deepEqual(S.STATE_DEFS.burning.triggers, S.DEFAULT_TRIGGER_EFFECTS.burning);
+  assert.equal(S.RULE_DEFS.find(rule => rule.id === 'burning-fire-grant').condition.durationMs, 5000);
+  assert.equal(S.RULE_DEFS.find(rule => rule.id === 'burning-fire-remove').condition.durationMs, 10000);
+});
